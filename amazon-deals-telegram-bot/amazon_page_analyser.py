@@ -38,13 +38,15 @@ def start_selenium():
         try:
             chromium_driver = webdriver.Remote(command_executor=os.environ.get("REMOTE_CHROMIUM"), options=chromium_options)
         except MaxRetryError:
-            sys.exit("Error connecting to remote chromium.")
-            if not os.environ.get("REMOTE_CHROMIUM").endswith('/wd/hub'):
+            remote_url = os.environ.get("REMOTE_CHROMIUM", "")
+            if not remote_url.endswith("/wd/hub"):
                 try:
                     print("Remote Chromium address does not end with '/wd/hub'. Trying to add it.")
-                    chromium_driver = webdriver.Remote(command_executor=os.environ.get("REMOTE_CHROMIUM") + '/wd/hub', options=chromium_options)
+                    chromium_driver = webdriver.Remote(
+                        command_executor=remote_url + "/wd/hub",
+                        options=chromium_options
+                    )
                 except MaxRetryError:
-                    print("Error connecting to remote chromium even with fix.")
                     sys.exit("Error connecting to remote chromium even with fix.")
             else:
                 sys.exit("Error connecting to remote chromium.")
@@ -212,7 +214,7 @@ def is_product(url):  # products have /dp/ in their url
 def extract_product_id(url):
     try:
         # using regex, get the id, that is what follows "dp/" and that comes before "/" or "?"
-        return re.search('dp\/(.*?)(?=\/|\?)', url).group(1)
+        return re.search(r"dp/(.*?)(?=/|\?)", url).group(1)
     except:
         return None
 
