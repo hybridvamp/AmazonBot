@@ -27,33 +27,31 @@ OUTPUT_DEALS_FILE = "deals_ids.json" if not os.environ.get("IS_CONTAINERIZED") e
 
 
 def get_random_product_info(deals_ids, already_sent_products_ids):
-    if(len(deals_ids) == 0):
-        return None
+    if len(deals_ids) == 0:
+        return None, already_sent_products_ids   # return tuple, not None
 
-    selected_deal_id = random.choice(deals_ids)  # select a random product to get the info
-    selected_product_info = apa.get_product_info(selected_deal_id)  # it may be None in case of some errors while scraping the page
+    selected_deal_id = random.choice(deals_ids)
+    selected_product_info = apa.get_product_info(selected_deal_id)
 
-    while True:  # get new product until the selected one is valid
+    while True:
         if (selected_product_info is not None) and (
-                selected_product_info["product_id"] not in already_sent_products_ids):  # product valid and not already sent
+            selected_product_info["product_id"] not in already_sent_products_ids
+        ):
             break
 
-        deals_ids.remove(selected_deal_id)  # remove invalid product to not encounter it in the next iteration
+        deals_ids.remove(selected_deal_id)
 
-        if(len(deals_ids) == 0):  # avoid infinte loop if there are no more products
-            return None
+        if len(deals_ids) == 0:
+            return None, already_sent_products_ids   # ✅ always a tuple
 
         selected_deal_id = random.choice(deals_ids)
-        selected_product_info = apa.get_product_info(random.choice(deals_ids))
+        selected_product_info = apa.get_product_info(selected_deal_id)
 
     already_sent_products_ids.append(selected_product_info["product_id"])
-    # it is necessary to save used products ids and not only remove them from the list because the list is recreated every few hours
 
-    while(len(already_sent_products_ids) >= 50):
-        already_sent_products_ids.pop(0)  # remove the oldest products sent if enough time has passed
+    while len(already_sent_products_ids) >= 50:
+        already_sent_products_ids.pop(0)
 
-    # return the selected product and the updated list of ids of products already sent
-    # the list deals_ids is not returned because: (1) it is frequently recreated, (2) an invalid id may become valid in the future if the error was temporary
     return selected_product_info, already_sent_products_ids
 
 

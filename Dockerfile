@@ -9,16 +9,14 @@ WORKDIR /app
 RUN mkdir /data
 VOLUME "/data"
 
-RUN apt-get update && apt-get install -y \
-    wget gnupg unzip curl \
-    && mkdir -p /etc/apt/keyrings \
-    && curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /etc/apt/keyrings/google-chrome.gpg \
-    && echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" \
-       > /etc/apt/sources.list.d/google-chrome.list \
-    && apt-get update && apt-get install -y \
-    google-chrome-stable \
-    chromium-driver \
-    && rm -rf /var/lib/apt/lists/*
+# Install matching chromedriver
+RUN CHROME_VERSION=$(google-chrome --version | awk '{print $3}') \
+    && CHROME_MAJOR=$(echo $CHROME_VERSION | cut -d. -f1) \
+    && DRIVER_VERSION=$(curl -s "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${CHROME_MAJOR}") \
+    && wget -q "https://chromedriver.storage.googleapis.com/${DRIVER_VERSION}/chromedriver_linux64.zip" \
+    && unzip chromedriver_linux64.zip -d /usr/bin/ \
+    && rm chromedriver_linux64.zip \
+    && chmod +x /usr/bin/chromedriver
 
 # Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
