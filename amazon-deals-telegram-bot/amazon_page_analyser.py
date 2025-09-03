@@ -123,7 +123,7 @@ def encode_amazon_deals_page(
 
 
 def get_all_deals_ids():
-    deals_page = "https://www.amazon.it/deals/"
+    deals_page = "https://www.amazon.in/deals/"
     selenium_driver = start_selenium()
 
     print("Starting taking all urls")
@@ -201,7 +201,7 @@ def extract_product_id(url):
 
 
 def url_from_id(product_id):
-    return "https://www.amazon.it/dp/" + product_id
+    return "https://www.amazon.in/dp/" + product_id
 
 
 def get_product_info(product_id, remove_ebooks=False):
@@ -238,22 +238,22 @@ def get_product_info(product_id, remove_ebooks=False):
             if(new_price == ' '):  # there is another way the price may be displayed (whole and decimal part)
                 new_price_whole = product_page_content.xpath('//span[contains(translate(@class, "PRICETOPAY", "pricetopay"), "pricetopay")]//span[@aria-hidden="true"]//span[@class="a-price-whole"]/text()')[0]
                 new_price_decimal = product_page_content.xpath('//span[contains(translate(@class, "PRICETOPAY", "pricetopay"), "pricetopay")]//span[@aria-hidden="true"]//span[@class="a-price-fraction"]/text()')[0]
-                new_price = new_price_whole + ',' + new_price_decimal + '€'  # put it in the other format, to use the same formula
+                new_price = new_price_whole + ',' + new_price_decimal + ' ₹'  # put it in the other format, to use the same formula
 
         elif(not remove_ebooks):
             # the price is written a bit differently, so:
             # remove the last two characters
             # remove any useless white space
             # add again the euro sign
-            old_price = product_page_content.xpath('//*[@id="basis-price"]/text()')[0][:-2].strip() + "€"
-            new_price = product_page_content.xpath('//*[@id="kindle-price"]/text()')[0][:-2].strip() + "€"
+            old_price = product_page_content.xpath('//*[@id="basis-price"]/text()')[0][:-2].strip() + " ₹"
+            new_price = product_page_content.xpath('//*[@id="kindle-price"]/text()')[0][:-2].strip() + " ₹"
         
         else:
             print("Skipping ebook")
             return None  # ignore the ebook
 
         # calculate discount rate from new and old prices. Round to int and add '-' and '%' signs
-        discount_rate = "-" + str(round(100 - (parse_decimal(new_price.strip('€'), locale='it') / parse_decimal(old_price.strip('€'), locale='it')) * 100)) + "%"
+        discount_rate = "-" + str(round(100 - (parse_decimal(new_price.strip(' ₹'), locale='it') / parse_decimal(old_price.strip(' ₹'), locale='it')) * 100)) + "%"
 
         image = product_page_content.xpath('//img[@id="landingImage"]/@src')
 
