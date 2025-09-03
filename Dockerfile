@@ -1,18 +1,21 @@
-FROM python:3.13-alpine
+FROM python:3.11-slim
 
-ENV PYTHONUNBUFFERED 1
+# Install Chrome and dependencies
+RUN apt-get update && apt-get install -y \
+    wget unzip gnupg \
+    && wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add - \
+    && echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list \
+    && apt-get update && apt-get install -y \
+    google-chrome-stable \
+    chromium-driver \
+    && rm -rf /var/lib/apt/lists/*
 
-# Set the working directory
+# Install Python deps
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy your app
 COPY . /app
 WORKDIR /app
 
-RUN mkdir /data
-VOLUME "/data"
-
-# Install dependencies
-RUN pip install --no-cache-dir -r requirements.txt
-
-ENV IS_CONTAINERIZED=true
-ENV REMOTE_CHROMIUM=http://selenium:4444/wd/hub
-
-CMD ["python", "amazon-deals-telegram-bot"]
+CMD ["python", "main.py"]

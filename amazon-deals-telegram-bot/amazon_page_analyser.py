@@ -27,33 +27,14 @@ import json
 
 
 def start_selenium():
-    chromium_service = Service()  # now Selenium download the correct version of the webdriver
+    chromium_service = Service()
+    chromium_options = webdriver.ChromeOptions()
+    chromium_options.add_argument("--headless")
+    chromium_options.add_argument("--no-sandbox")
+    chromium_options.add_argument("--disable-dev-shm-usage")
+    chromium_options.add_argument('--log-level=1')
 
-    chromium_options = webdriver.ChromeOptions()  # add the debug options you need
-    chromium_options.add_argument("--headless")  # do not open chromium gui
-    chromium_options.add_argument('--log-level=1') # remove useless logs
-
-    # create a Chromium tab with the selected options
-    if os.environ.get("REMOTE_CHROMIUM"):
-        try:
-            chromium_driver = webdriver.Remote(command_executor=os.environ.get("REMOTE_CHROMIUM"), options=chromium_options)
-        except MaxRetryError:
-            remote_url = os.environ.get("REMOTE_CHROMIUM", "")
-            if not remote_url.endswith("/wd/hub"):
-                try:
-                    print("Remote Chromium address does not end with '/wd/hub'. Trying to add it.")
-                    chromium_driver = webdriver.Remote(
-                        command_executor=remote_url + "/wd/hub",
-                        options=chromium_options
-                    )
-                except MaxRetryError:
-                    sys.exit("Error connecting to remote chromium even with fix.")
-            else:
-                sys.exit("Error connecting to remote chromium.")
-    else:
-        chromium_driver = webdriver.Chrome(service=chromium_service, options=chromium_options)
-
-    return chromium_driver
+    return webdriver.Chrome(service=chromium_service, options=chromium_options)
 
 
 def decode_amazon_deals_page(url):
