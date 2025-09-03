@@ -75,8 +75,8 @@ def send_deal(bot, product_info, chat_id):
         return
 
     emoticon = ['\U0000203C', '\U00002757', '\U0001F525', '\U000026A1', '\U00002728']  # elements of message
-    starting_text = ['A soli ', 'Solamente ', 'Soltanto ', 'Appena ', 'Incredibilmente solo ', 'Incredibilmente soltanto ']
-    comparison_text = ['invece di ', 'al posto di ', 'piuttosto che ']
+    starting_text = ['Only ', 'Just ', 'At only ', 'For just ', 'For only ']
+    comparison_text = ['instead of ', 'rather than ', 'in place of ']
 
     caption = "<b>" + product_info["title"] + "</b>" + "\n\n"
     caption += "\U0001F449 " + add_affiliate_id(apa.url_from_id(product_info["product_id"]), os.environ.get("AMAZON_DEALS_TG_AFFILIATE_ID")) + "\n\n"
