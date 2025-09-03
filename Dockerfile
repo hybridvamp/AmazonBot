@@ -1,6 +1,14 @@
-FROM python:3.11-slim
+FROM python:3.13-alpine
 
-# Install Chrome and dependencies
+ENV PYTHONUNBUFFERED 1
+
+# Set the working directory
+COPY . /app
+WORKDIR /app
+
+RUN mkdir /data
+VOLUME "/data"
+
 RUN apt-get update && apt-get install -y \
     wget gnupg unzip curl \
     && mkdir -p /etc/apt/keyrings \
@@ -12,12 +20,9 @@ RUN apt-get update && apt-get install -y \
     chromium-driver \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python dependencies
-COPY requirements.txt .
+# Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy your app
-WORKDIR /app
-COPY . .
+ENV IS_CONTAINERIZED=true
 
-CMD ["python", "-m", "amazon-deals-telegram-bot"]
+CMD ["python", "amazon-deals-telegram-bot"]
